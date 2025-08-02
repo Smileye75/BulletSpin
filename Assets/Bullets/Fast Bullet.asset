@@ -17,7 +17,7 @@ MonoBehaviour:
   imagePrefab: {fileID: 3419366693975757575, guid: 220faa518355ef54fa0a097e25cfc93c,
     type: 3}
   speed: 50
-  damage: 1
+  damage: 5
   numberOfLoops: 10
   verticalOffset: 1
   orbitSpeed: 720

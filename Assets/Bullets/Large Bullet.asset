@@ -14,14 +14,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bulletPrefab: {fileID: 1539298063261786869, guid: 29e47bcfda8b07d46962ded927dd332d,
     type: 3}
-  imagePrefab: {fileID: 1539298063261786869, guid: 29e47bcfda8b07d46962ded927dd332d,
+  imagePrefab: {fileID: 6281654318883666868, guid: 371e6fe6fa479d94ab36516dcdafc0d7,
     type: 3}
   speed: 10
-  damage: 1
+  damage: 10
   numberOfLoops: 5
   verticalOffset: 1
   orbitSpeed: 180
-  returnSpeed: 100
+  returnSpeed: 15
   startRadius: 5
   endRadius: 1
   travelDistance: 5

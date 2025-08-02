@@ -7,105 +7,99 @@ public class AmmoUI : MonoBehaviour
 {
     [Header("UI References")]
     [SerializeField] private GameObject bulletSlotPrefab;
+    [SerializeField] private Transform extraParentContainer; // Layout Group for extra slots
     [SerializeField] private Transform centerPosition;
     [SerializeField] private Transform nextPosition;
     [SerializeField] private AmmoSlot ammoSlot;
 
+    private GameObject prevSlotUI;
     private GameObject currentSlotUI;
     private GameObject nextSlotUI;
 
-    private Image currentImage;
-    private Image nextImage;
-
+    private List<GameObject> extraSlotsUI = new();
     private int currentIndex = 0;
-
-    public static object Instance { get; internal set; }
 
     void Start()
     {
-        SetupInitialSlots();
+        SetupSlots();
+        UpdateVisuals();
     }
 
     void Update()
     {
-        UpdateSlotVisuals();
-    }
-
-    void SetupInitialSlots()
-    {
-        var bullets = ammoSlot.GetAllBullets();
-        if (bullets.Count < 2) return;
-
-        currentSlotUI = Instantiate(bulletSlotPrefab, centerPosition.position, Quaternion.identity, transform);
-        nextSlotUI = Instantiate(bulletSlotPrefab, nextPosition.position, Quaternion.identity, transform);
-
-        currentImage = currentSlotUI.GetComponent<Image>();
-        nextImage = nextSlotUI.GetComponent<Image>();
-
-        UpdateSlotVisuals();
+        UpdateVisuals();
     }
 
     public void RotateUIToNext()
     {
         var bullets = ammoSlot.GetAllBullets();
         if (bullets.Count == 0) return;
-
         currentIndex = (currentIndex + 1) % bullets.Count;
-
-        // Swap GameObject references
-        GameObject tempObj = currentSlotUI;
-        currentSlotUI = nextSlotUI;
-        nextSlotUI = tempObj;
-
-        // Swap image references
-        Image tempImg = currentImage;
-        currentImage = nextImage;
-        nextImage = tempImg;
-
-        // Update positions
-        currentSlotUI.transform.position = centerPosition.position;
-        nextSlotUI.transform.position = nextPosition.position;
-
-        UpdateSlotVisuals();
+        UpdateVisuals();
     }
 
-void UpdateSlotVisuals()
-{
-    var bullets = ammoSlot.GetAllBullets();
-    if (bullets.Count == 0) return;
-
-    int nextIndex = (currentIndex + 1) % bullets.Count;
-
-    // Destroy old children (icon objects)
-    foreach (Transform child in currentSlotUI.transform)
-        Destroy(child.gameObject);
-    foreach (Transform child in nextSlotUI.transform)
-        Destroy(child.gameObject);
-
-    // Instantiate the imagePrefab for current and next bullet, and set color based on availability
-    var availability = ammoSlot.GetBulletAvailability();
-    if (bullets[currentIndex].imagePrefab != null)
+    void SetupSlots()
     {
-        var iconObj = Instantiate(bullets[currentIndex].imagePrefab, currentSlotUI.transform);
-        iconObj.transform.localPosition = Vector3.zero;
-        iconObj.transform.localScale = Vector3.one;
-        var img = iconObj.GetComponent<Image>();
-        if (img != null)
-            img.color = availability[currentIndex] ? Color.white : Color.gray;
-    }
-    if (bullets[nextIndex].imagePrefab != null)
-    {
-        var iconObj = Instantiate(bullets[nextIndex].imagePrefab, nextSlotUI.transform);
-        iconObj.transform.localPosition = Vector3.zero;
-        iconObj.transform.localScale = Vector3.one;
-        var img = iconObj.GetComponent<Image>();
-        if (img != null)
-            img.color = availability[nextIndex] ? Color.white : Color.gray;
+        // Remove previous slot, only use extra slots
+        currentSlotUI = Instantiate(bulletSlotPrefab, centerPosition.position, Quaternion.identity, transform);
+        nextSlotUI = Instantiate(bulletSlotPrefab, nextPosition.position, Quaternion.identity, transform);
+
+        // Setup extra slots (will be reused)
+        for (int i = 0; i < 5; i++) // You can adjust the number of extra slots
+        {
+            GameObject extraSlot = Instantiate(bulletSlotPrefab, extraParentContainer);
+            extraSlotsUI.Add(extraSlot);
+        }
     }
 
-    currentSlotUI.transform.localScale = Vector3.one * 1.2f;
-    nextSlotUI.transform.localScale = Vector3.one * 0.8f;
-}
+    void UpdateVisuals()
+    {
+        var bullets = ammoSlot.GetAllBullets();
+        var availability = ammoSlot.GetBulletAvailability();
+        int count = bullets.Count;
+        if (count < 1) return;
+
+        int nextIndex = (currentIndex + 1) % count;
+
+        float extraScale = 0.7f;
+        float nextScale = 0.9f;
+        SetBulletVisual(currentSlotUI.GetComponent<Image>(), bullets[currentIndex], availability[currentIndex], 1.2f);
+        SetBulletVisual(nextSlotUI.GetComponent<Image>(), bullets[nextIndex], availability[nextIndex], nextScale);
+
+        // Fill extra slots (all not current, next) in reverse order
+        int extraSlotIdx = 0;
+        for (int i = count - 1; i >= 0; i--)
+        {
+            if (i == currentIndex || i == nextIndex) continue;
+            if (extraSlotIdx >= extraSlotsUI.Count) break;
+            SetBulletVisual(extraSlotsUI[extraSlotIdx].GetComponent<Image>(), bullets[i], availability[i], extraScale);
+            extraSlotsUI[extraSlotIdx].SetActive(true);
+            extraSlotIdx++;
+        }
+        // Hide and clear unused extra slots
+        for (; extraSlotIdx < extraSlotsUI.Count; extraSlotIdx++)
+        {
+            extraSlotsUI[extraSlotIdx].SetActive(false);
+            var img = extraSlotsUI[extraSlotIdx].GetComponent<Image>();
+            if (img != null)
+            {
+                img.sprite = null;
+                img.color = Color.clear;
+            }
+        }
+    }
+
+    void SetBulletVisual(Image image, BulletData data, bool available, float scale)
+    {
+        if (image == null || data.imagePrefab == null) return;
+        var prefabImage = data.imagePrefab.GetComponent<Image>();
+        if (prefabImage != null)
+        {
+            image.sprite = prefabImage.sprite;
+            image.color = available ? Color.white : Color.gray;
+            image.transform.localScale = Vector3.one * scale;
+        }
+    }
 
     public int GetCurrentIndex() => currentIndex;
 }

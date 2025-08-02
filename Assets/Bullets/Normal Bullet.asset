@@ -17,11 +17,11 @@ MonoBehaviour:
   imagePrefab: {fileID: 5259845611880964796, guid: 19e27e682153c394491dc86bfc0aeb06,
     type: 3}
   speed: 20
-  damage: 1
+  damage: 3
   numberOfLoops: 3
   verticalOffset: 1
   orbitSpeed: 360
-  returnSpeed: 100
+  returnSpeed: 30
   startRadius: 4
   endRadius: 0.5
   travelDistance: 2

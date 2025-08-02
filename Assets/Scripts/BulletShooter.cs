@@ -11,9 +11,11 @@ public class BulletShooter : MonoBehaviour
     [SerializeField] private AudioClip shootSound;
     [SerializeField] private AudioSource audioSource;
     [SerializeField] private AmmoUI ammoUI;
+    [SerializeField] private ForceReceiver forceReceiver;
 
     public void ShootOnce()
     {
+        // Push player back a little when shooting
         // Aim at mouse cursor before shooting
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
@@ -31,13 +33,16 @@ public class BulletShooter : MonoBehaviour
         }
 
         if (!ammoSlot.HasAvailableBullet()) return;
+
+        
+
         ammoUI.RotateUIToNext();
         int slotIndex;
         var data = ammoSlot.GetNextBullet(out slotIndex);
         if (data == null) return;
 
         GameObject bullet = Instantiate(data.bulletPrefab, muzzlePoint.position, Quaternion.identity);
-
+        forceReceiver.ApplyKnockback(transform.position + transform.forward);
         if (bullet.TryGetComponent(out LoopingBullets looping))
         {
             looping.Initialize(

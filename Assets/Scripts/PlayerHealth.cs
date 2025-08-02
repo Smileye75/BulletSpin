@@ -27,7 +27,7 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth = Mathf.Max(currentHealth - amount, 0);
         UpdateHealthBar();
-
+        GetComponent<FlashDamage>()?.TriggerMaterialChange();
         if (currentHealth <= 0)
             Die();
     }

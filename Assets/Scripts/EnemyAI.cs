@@ -3,16 +3,19 @@ using UnityEngine;
 public class EnemyAI : MonoBehaviour
 {
     [Header("Movement")]
-    [SerializeField] private float speed = 2f;
+    [SerializeField] private float speed;
     private Transform target;
 
     [Header("Health")]
-    [SerializeField] private int maxHealth = 50;
+    [SerializeField] private int maxHealth;
     private int currentHealth;
 
-    [SerializeField] private int damage = 10;
+    [SerializeField] private int damage;
 
+    [SerializeField] private Animator animator;
 
+    [Header("Death Settings")]
+    [SerializeField] private GameObject disableLight;
     private void Awake()
     {
         currentHealth = maxHealth;
@@ -26,18 +29,27 @@ public class EnemyAI : MonoBehaviour
     public void TakeDamage(int amount)
     {
         currentHealth = Mathf.Max(currentHealth - amount, 0);
+        GetComponent<FlashDamage>()?.TriggerMaterialChange();
         if (currentHealth <= 0)
             Die();
     }
 
-    public void DealDamage(int amount)
-    {
 
-    }
+
 
     private void Die()
     {
-        Destroy(gameObject); // Or play death animation, etc.
+        animator.SetTrigger("Die");
+        // Disable specified GameObject if assigned
+        if (disableLight != null)
+        {
+            disableLight.SetActive(false);
+        }
+
+        // Stop chasing the player
+        target = null;
+
+        Destroy(gameObject, 1f); // Or play death animation, etc.
     }
 
     void Update()
