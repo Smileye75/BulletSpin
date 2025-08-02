@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d24cf60ae63549e428b04df5b899f3a8, type: 3}
+  m_Name: Normal Bullet
+  m_EditorClassIdentifier: 
+  bulletPrefab: {fileID: 1539298063261786869, guid: 8abb76af824d2f64a90f70215a07b3c0,
+    type: 3}
+  imagePrefab: {fileID: 5259845611880964796, guid: 19e27e682153c394491dc86bfc0aeb06,
+    type: 3}
+  speed: 20
+  damage: 1
+  numberOfLoops: 3
+  verticalOffset: 1
+  orbitSpeed: 360
+  returnSpeed: 100
+  startRadius: 4
+  endRadius: 0.5
+  travelDistance: 2
