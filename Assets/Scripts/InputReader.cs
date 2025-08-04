@@ -11,7 +11,7 @@ public class InputReader : MonoBehaviour, Controls.IPlayerActions
 {
     [Header("Runtime Input Values")]
     [Tooltip("Current movement input value.")]
-    [HideInInspector] public Vector2 movementValue; // Stores movement input (WASD/joystick)
+    [HideInInspector] public Vector2 movementValue; // Stores movement input
 
     // Events for input actions
     public event Action isShooting;   

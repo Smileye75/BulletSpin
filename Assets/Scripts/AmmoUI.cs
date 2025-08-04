@@ -1,35 +1,52 @@
+// ------------------------------------------------------------
+// AmmoUI.cs
+// Handles the UI display and cycling for bullet slots.
+// ------------------------------------------------------------
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Manages bullet slot UI, scaling, and cycling visuals.
+/// </summary>
 public class AmmoUI : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private GameObject bulletSlotPrefab;
+    [SerializeField] private GameObject bulletSlotPrefab; // Prefab for bullet slot UI
     [SerializeField] private Transform extraParentContainer; // Layout Group for extra slots
-    [SerializeField] private Transform centerPosition;
-    [SerializeField] private Transform nextPosition;
-    [SerializeField] private AmmoSlot ammoSlot;
+    [SerializeField] private Transform centerPosition; // Center slot position
+    [SerializeField] private Transform nextPosition; // Next slot position
+    [SerializeField] private AmmoSlot ammoSlot; // Reference to AmmoSlot logic
 
     private GameObject prevSlotUI;
     private GameObject currentSlotUI;
     private GameObject nextSlotUI;
 
-    private List<GameObject> extraSlotsUI = new();
-    private int currentIndex = 0;
+    private List<GameObject> extraSlotsUI = new(); // Extra slots for hidden bullets
+    private int currentIndex = 0; // Current bullet index
 
+    /// <summary>
+    /// Initializes bullet slot UI on start.
+    /// </summary>
     void Start()
     {
         SetupSlots();
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Updates bullet slot visuals every frame.
+    /// </summary>
     void Update()
     {
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Rotates UI to the next bullet slot.
+    /// </summary>
     public void RotateUIToNext()
     {
         var bullets = ammoSlot.GetAllBullets();
@@ -38,6 +55,9 @@ public class AmmoUI : MonoBehaviour
         UpdateVisuals();
     }
 
+    /// <summary>
+    /// Instantiates and sets up bullet slot UI objects.
+    /// </summary>
     void SetupSlots()
     {
         // Remove previous slot, only use extra slots
@@ -52,6 +72,9 @@ public class AmmoUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Updates the visuals for all bullet slots, scaling and coloring as needed.
+    /// </summary>
     void UpdateVisuals()
     {
         var bullets = ammoSlot.GetAllBullets();
@@ -89,6 +112,9 @@ public class AmmoUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Sets the visual appearance of a bullet slot (sprite, color, scale).
+    /// </summary>
     void SetBulletVisual(Image image, BulletData data, bool available, float scale)
     {
         if (image == null || data.imagePrefab == null) return;
@@ -101,5 +127,8 @@ public class AmmoUI : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the current bullet index.
+    /// </summary>
     public int GetCurrentIndex() => currentIndex;
 }

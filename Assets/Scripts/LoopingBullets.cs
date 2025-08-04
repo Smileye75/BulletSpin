@@ -1,8 +1,17 @@
+// ------------------------------------------------------------
+// LoopingBullets.cs
+// Handles bullet movement: travel, orbit, return, and damage logic.
+// ------------------------------------------------------------
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Controls bullet movement phases: forward travel, orbiting, and returning.
+/// Handles damage to enemies and ammo slot management.
+/// </summary>
 public class LoopingBullets : MonoBehaviour
 {
     // -------------------
@@ -25,11 +34,9 @@ public class LoopingBullets : MonoBehaviour
     private float travelDistance;    // Forward travel distance
     private float travelSpeed;       // Forward travel speed
     private Vector3 travelDirection; // Initial direction
-    private AmmoSlot ammoSlot;
+    private AmmoSlot ammoSlot;       // Reference to ammo slot
 
-    private int bulletDamage;
-
-
+    private int bulletDamage;        // Damage dealt by bullet
 
     // -------------------
     // Runtime State
@@ -43,43 +50,42 @@ public class LoopingBullets : MonoBehaviour
     /// <summary>
     /// Initializes the bullet's movement and orbit parameters.
     /// </summary>
-public void Initialize(
-    Transform orbitCenter,
-    Transform returnTarget,
-    int loops,
-    float verticalOffset,
-    float orbitSpeed,
-    float returnSpeed,
-    float startRadius,
-    float endRadius,
-    float travelDistance,
-    float travelSpeed,
-    Vector3 travelDirection,
-    int damage)
-{
-    this.orbitCenter = orbitCenter;
-    this.returnTarget = returnTarget;
-    this.numberOfLoops = loops;
-    this.verticalOffset = verticalOffset;
-    this.orbitSpeed = orbitSpeed;
-    this.returnSpeed = returnSpeed;
-    this.startRadius = startRadius;
-    this.endRadius = endRadius;
-    this.travelDistance = travelDistance;
-    this.travelSpeed = travelSpeed;
-    this.travelDirection = travelDirection.normalized;
-    this.bulletDamage = damage;
+    public void Initialize(
+        Transform orbitCenter,
+        Transform returnTarget,
+        int loops,
+        float verticalOffset,
+        float orbitSpeed,
+        float returnSpeed,
+        float startRadius,
+        float endRadius,
+        float travelDistance,
+        float travelSpeed,
+        Vector3 travelDirection,
+        int damage)
+    {
+        this.orbitCenter = orbitCenter;
+        this.returnTarget = returnTarget;
+        this.numberOfLoops = loops;
+        this.verticalOffset = verticalOffset;
+        this.orbitSpeed = orbitSpeed;
+        this.returnSpeed = returnSpeed;
+        this.startRadius = startRadius;
+        this.endRadius = endRadius;
+        this.travelDistance = travelDistance;
+        this.travelSpeed = travelSpeed;
+        this.travelDirection = travelDirection.normalized;
+        this.bulletDamage = damage;
 
-    phase = BulletPhase.TravelForward;
-    traveled = 0f;
-    angle = 0f;
-    completedLoops = 0;
-}
+        phase = BulletPhase.TravelForward;
+        traveled = 0f;
+        angle = 0f;
+        completedLoops = 0;
+    }
 
     /// <summary>
-/// Sets the trail renderer's color if one is attached.
-/// </summary>
-
+    /// Updates bullet movement phase each frame.
+    /// </summary>
     private void Update()
     {
         // Safety check: must have valid references
@@ -149,40 +155,48 @@ public void Initialize(
         }
     }
 
-// Ammo management fields
-private int bulletSlotIndex;
+    // Ammo management fields
+    private int bulletSlotIndex;
 
-/// <summary>
-/// Sets the ammo slot and bullet index for return logic.
-/// </summary>
-public void SetAmmoSlot(AmmoSlot slot, int index)
-{
-    ammoSlot = slot;
-    bulletSlotIndex = index;
-}
-private void OnTriggerEnter(Collider other)
-{
-    if (other.TryGetComponent<EnemyAI>(out var enemy) || other.CompareTag("Enemy"))
+    /// <summary>
+    /// Sets the ammo slot and bullet index for return logic.
+    /// </summary>
+    public void SetAmmoSlot(AmmoSlot slot, int index)
     {
-        enemy.TakeDamage(bulletDamage);
+        ammoSlot = slot;
+        bulletSlotIndex = index;
     }
 
-}
+    /// <summary>
+    /// Handles collision with enemies and applies damage.
+    /// </summary>
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!other.CompareTag("Enemy")) return;
+
+        if (other.TryGetComponent<EnemyAI>(out var enemy))
+        {
+            enemy.TakeDamage(bulletDamage);
+            return;
+        }
+        if (other.TryGetComponent<ToxicEnemyAI>(out var toxicEnemy))
+        {
+            toxicEnemy.TakeDamage(bulletDamage);
+            return;
+        }
+        // Optionally, add more enemy types here
+    }
 
     /// <summary>
     /// Returns the bullet to the ammo slot and destroys it when close.
     /// </summary>
     private void ReturnToPlayer()
     {
-    transform.position = Vector3.MoveTowards(transform.position, returnTarget.position, returnSpeed * Time.deltaTime);
-
-    if (Vector3.Distance(transform.position, returnTarget.position) < 0.1f)
-    {
-if (Vector3.Distance(transform.position, returnTarget.position) < 0.1f)
-{
-    ammoSlot?.ReturnBullet(bulletSlotIndex);
-    Destroy(gameObject);
-}
-    }
+        transform.position = Vector3.MoveTowards(transform.position, returnTarget.position, returnSpeed * Time.deltaTime);
+        if (Vector3.Distance(transform.position, returnTarget.position) < 0.1f)
+        {
+            ammoSlot?.ReturnBullet(bulletSlotIndex);
+            Destroy(gameObject);
+        }
     }
 }

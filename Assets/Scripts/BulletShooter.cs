@@ -1,21 +1,57 @@
+// ------------------------------------------------------------
+// BulletShooter.cs
+// Handles bullet shooting, aiming, and custom cursor setup.
+// ------------------------------------------------------------
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Manages bullet shooting, aiming, and custom cursor for the player.
+/// </summary>
 public class BulletShooter : MonoBehaviour
 {
-    [SerializeField] private Transform muzzlePoint;
-    [SerializeField] private Transform orbitCenter;
-    [SerializeField] private Transform ammoSlotPoint;
-    [SerializeField] private AmmoSlot ammoSlot;
-    [SerializeField] private AudioClip shootSound;
-    [SerializeField] private AudioSource audioSource;
-    [SerializeField] private AmmoUI ammoUI;
-    [SerializeField] private ForceReceiver forceReceiver;
+    public static bool isUpgrading = false; // Prevent shooting while upgrading
 
+    [SerializeField] private Texture2D crosshairCursor; // Custom cursor texture
+    [SerializeField] private Transform muzzlePoint;      // Bullet spawn point
+    [SerializeField] private Transform orbitCenter;      // Orbit center for bullets
+    [SerializeField] private Transform ammoSlotPoint;    // Return point for bullets
+    [SerializeField] private AmmoSlot ammoSlot;          // Reference to AmmoSlot logic
+    [SerializeField] private AudioClip shootSound;       // Sound effect for shooting
+    [SerializeField] private AudioSource audioSource;    // Audio source for sounds
+    [SerializeField] private AmmoUI ammoUI;              // Reference to AmmoUI logic
+    [SerializeField] private ForceReceiver forceReceiver;// Reference to ForceReceiver for knockback
+
+    /// <summary>
+    /// Sets the custom cursor on game start.
+    /// </summary>
+    private void Start()
+    {
+        if (crosshairCursor != null)
+            Cursor.SetCursor(crosshairCursor, Vector2.zero, CursorMode.Auto);
+    }
+
+    /// <summary>
+    /// Prevents shooting if the current bullet slot is not available.
+    /// </summary>
+    void Update()
+    {
+        if (isUpgrading) return;
+        int currentIndex = ammoUI.GetCurrentIndex();
+        if (!ammoSlot.IsBulletAvailable(currentIndex)) return;
+    }
+
+    /// <summary>
+    /// Shoots a bullet, applies knockback, and rotates UI to next slot.
+    /// </summary>
     public void ShootOnce()
     {
-        // Push player back a little when shooting
+        if (isUpgrading) return;
+        int currentIndex = ammoUI.GetCurrentIndex();
+        if (!ammoSlot.IsBulletAvailable(currentIndex)) return;
+
         // Aim at mouse cursor before shooting
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         Plane groundPlane = new Plane(Vector3.up, transform.position);
@@ -33,8 +69,6 @@ public class BulletShooter : MonoBehaviour
         }
 
         if (!ammoSlot.HasAvailableBullet()) return;
-
-        
 
         ammoUI.RotateUIToNext();
         int slotIndex;

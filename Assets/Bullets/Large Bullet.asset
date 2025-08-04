@@ -23,5 +23,5 @@ MonoBehaviour:
   orbitSpeed: 180
   returnSpeed: 15
   startRadius: 5
-  endRadius: 1
+  endRadius: 2
   travelDistance: 5
